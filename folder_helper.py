@@ -1,26 +1,29 @@
 import os
 import zipfile
-from google_connector import credentials_config
 import subprocess
-from utils.conf_init import cfg
-class FolderHelper:   
-    
-    def __init__(self):
-        credentials_info = credentials_config.credentials_info
-        self.root_folder = cfg.get('google_connector', None).get('root_folder')
+import utils.conf_init as global_config
 
+class FolderHelper:  
 
-    def zip_subfolder(self, folder_name):
-        item_path = os.path.join(self.root_folder, folder_name)
+    @staticmethod
+    def _get_root_folder():
+        return global_config.cfg.get('google_connector', None).get('root_folder')
+
+    @staticmethod
+    def zip_subfolder(folder_name):
+        root_folder = FolderHelper._get_root_folder()
+
+        item_path = os.path.join(root_folder, folder_name)
         zip_path = ''
         if os.path.isdir(item_path):
-            zip_path = os.path.join(self.root_folder, f"{folder_name}.zip")
-            self._zip_directory(item_path, zip_path)
+            zip_path = os.path.join(root_folder, f"{folder_name}.zip")
+            FolderHelper._zip_directory(item_path, zip_path)
             print(f"Zipped {item_path} -> {zip_path}")     
 
-        return os.path.basename(zip_path)          
-
-    def _zip_directory(self, dir_path, zip_path):
+        return os.path.basename(zip_path)   
+           
+    @staticmethod
+    def _zip_directory(dir_path, zip_path):
 
         with zipfile.ZipFile(zip_path, 'w', zipfile.ZIP_DEFLATED) as zipf:
             for root, dirs, files in os.walk(dir_path):
@@ -29,9 +32,11 @@ class FolderHelper:
                     arcname = os.path.relpath(file_path, start=dir_path)
                     zipf.write(file_path, arcname) 
 
-    def remove_folder(self, folder_name):
-        folder_path = os.path.join(self.root_folder, folder_name)
-        zip_path = os.path.join(self.root_folder, f"{folder_name}.zip")
+    @staticmethod
+    def remove_folder(folder_name):
+        root_folder = FolderHelper._get_root_folder()
+        folder_path = os.path.join(root_folder, folder_name)
+        zip_path = os.path.join(root_folder, f"{folder_name}.zip")
 
         folder_removed = False
         if os.path.isdir(folder_path):
@@ -57,21 +62,24 @@ class FolderHelper:
             else:
                 print(f"ZIP file not found: {zip_path}")
 
-    def get_all_folders(self):
+    @staticmethod
+    def get_all_folders():
         folders = []
-        for item in os.listdir(self.root_folder):
+        root_folder = FolderHelper._get_root_folder()
+        for item in os.listdir(root_folder):
             folders.append(item)
         return folders
     
-    def get_unzipped_subfolders(self):
+    @staticmethod
+    def get_unzipped_subfolders():
         folders = []
-
-        for item in os.listdir(self.root_folder):
-            item_path = os.path.join(self.root_folder, item)
+        root_folder = FolderHelper._get_root_folder()
+        for item in os.listdir(root_folder):
+            item_path = os.path.join(root_folder, item)
             # Check if it's a directory
             if os.path.isdir(item_path):
                 zip_filename = f"{item}.zip"
-                zip_path = os.path.join(self.root_folder, zip_filename)
+                zip_path = os.path.join(root_folder, zip_filename)
                 # Check if ZIP exists
                 if not os.path.isfile(zip_path):
                     # No ZIP found for this subfolder
@@ -79,5 +87,4 @@ class FolderHelper:
 
         return folders
 
-folder_helper = FolderHelper()
         
