@@ -1,0 +1,65 @@
+# List of sourses
+sources:
+  # File (auto-detected via uridecodebin)
+  - { type: auto,   uri: "/workspace/videos/video4testing.mp4", width: 1536, height: 2048, framerate: 15, decode: software }
+  #- { type: auto,   uri: "/workspace/videos/out_1536p_pillar.mp4", width: 1536, height: 2048, decode: software }
+  # USB camera
+  #- { type: camera, uri: "/dev/video0", framerate: 15, width: 2048, height: 1536, }
+  # Image set
+  #- { type: images, uri: "/workspace/dataset/images", pattern: "frame_%06d.jpg", framerate: 30, decode: software }
+
+streammux:
+  width: 960 #2048
+  height: 1280 #1536
+  batched_push_timeout: 330
+
+nvinfer:
+  config_file: "/workspace/configs/pgie_config.txt"
+
+labels:
+  path: "/workspace/models/labels.txt"
+
+sink:
+  # auto | nv3dsink | nveglglessink | fakesink
+  type: nveglglessink
+
+#source:
+#  width: 2048
+#  height: 1536
+#  fps_n: 15
+#  fps_d: 1
+
+# Tracker (can set empty or fill our values)
+tracker:
+  enable: false
+  #ll-lib-file: "/opt/nvidia/deepstream/deepstream/lib/libnvds_nvmultiobjecttracker.so"
+  #tracker-width: 960
+  #tracker-height: 1280
+  #ll-config-file: "/workspace/configs/config_tracker_NvDCF_perf.yml"
+  #display-tracking-id: 1
+
+frame_selector:
+  mutual_area: 0.3 #The area of left of the middle of the image. 0.5 is almost no mutual area
+  resize_scale: 0.25
+  roi_width_ratio: 0.2
+  roi_height_ratio: 0.6
+  json_template_file: "/workspace/configs/template_json.txt"
+  calibration_file: "/workspace/configs/calib_info_2048_1536.txt"
+  realogram_json: "/workspace/configs/Realogram.json"
+  scaninfo_json: "/workspace/configs/ScanInfo.json"
+  output_dir: "/workspace/panorama_frames"
+  draw_roi: false
+  tracker_type: "CSRT" # KCF, MIL, MOSSE, CSRT
+
+sliding_majority:
+  window_size: 30
+  min_votes_percentage: 0.6
+  #reference_csv: "/workspace/configs/table.tsv"
+  reference_csv: "/workspace/configs/test_output_catalog.csv"
+
+google_connector:
+  config_file: "/workspace/configs/shelfauditdec19-427710832de8.json"
+  root_folder: "/home/elad/repos/Arpalus/panorama_frames"
+  
+
+
